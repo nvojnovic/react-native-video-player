@@ -456,7 +456,7 @@
         NSLog(@"创建录像目录");
         NSString *newFileName = [FileManager getRandomFileName:@"mp4"];
         
-        NSString *recordScreenshot=[self recordVideoSaveBitmap:newFileName];
+        //NSString *recordScreenshot=[self recordVideoSaveBitmap:newFileName];
         
         NSString *newPath = [[NSString alloc] initWithFormat:@"%@/%@", docmentPath, newFileName ];
         [self.avWriter setUrl:[NSURL URLWithString:newPath]];
@@ -471,12 +471,12 @@
         
         NSMutableDictionary *dataResponse = [[NSMutableDictionary alloc] init];
         NSURL *fileURL = [NSURL fileURLWithPath:newPath];
-        NSURL *recordScreenshotURL = [NSURL fileURLWithPath:recordScreenshot];
+        //NSURL *recordScreenshotURL = [NSURL fileURLWithPath:recordScreenshot];
         [dataResponse setObject:docmentPath forKey:@"path"];
         [dataResponse setObject:newFileName forKey:@"fileName"];
         [dataResponse setObject:[fileURL absoluteString] forKey:@"uri"];
-        [dataResponse setObject:recordScreenshot forKey:@"recordScreenshotPath"];
-        [dataResponse setObject:recordScreenshotURL forKey:@"recordScreenshotURL"];
+        //[dataResponse setObject:recordScreenshot forKey:@"recordScreenshotPath"];
+        //[dataResponse setObject:recordScreenshotURL forKey:@"recordScreenshotURL"];
         
 
         NSLog(@"开始录像:%@",dataResponse);
@@ -490,7 +490,7 @@
     //停止写入
     if (_isRecording) {
         [_avWriter stopRecord:^(NSMutableDictionary *dataResponse) {
-            if(self.onVideoSaveBitmap) {
+            if(self.onStopRecordVideo) {
                 NSLog(@"录像保存成功:%@",dataResponse);
                 self.onStopRecordVideo(dataResponse);
             }

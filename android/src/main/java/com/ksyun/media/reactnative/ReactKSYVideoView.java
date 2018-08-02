@@ -325,9 +325,9 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
         /* 使用自动模式 */
 //        ksyTextureView.setDecodeMode(KSYMediaPlayer.KSYDecodeMode.KSY_DECODE_MODE_AUTO);
 
-        videoFile = new File(Environment.getExternalStorageDirectory(),"yunkan/records");
-        imageFile = new File(Environment.getExternalStorageDirectory(),"yunkan/screenshots");
-        recordScreenshotsFile = new File(Environment.getExternalStorageDirectory(),"yunkan/recordScreenshots");
+        videoFile = new File(Environment.getExternalStorageDirectory(),"zipato/records");
+        imageFile = new File(Environment.getExternalStorageDirectory(),"zipato/screenshots");
+        //recordScreenshotsFile = new File(Environment.getExternalStorageDirectory(),"zipato/recordScreenshots");
 
         if (!videoFile.exists()) {
             Log.d(TAG,"目录不存在，创建目录："+videoFile.getAbsolutePath());
@@ -342,12 +342,12 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
             Log.d(TAG,"目录已存在："+imageFile.getAbsolutePath());
         }
 
-        if (!recordScreenshotsFile.exists()) {
+        /*if (!recordScreenshotsFile.exists()) {
             Log.d(TAG,"目录不存在，创建目录："+recordScreenshotsFile.getAbsolutePath());
             recordScreenshotsFile.mkdirs();
         }else{
             Log.d(TAG,"目录已存在："+recordScreenshotsFile.getAbsolutePath());
-        }
+        }*/
 
         mHandler = new Handler() {
             @Override
@@ -464,7 +464,7 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
         int seq = random.nextInt(200);
         String videoName = str +"-"+ seq + ".mp4";
 
-        WritableMap event = reacordVideoSaveBitmap(videoName);
+        //WritableMap event = reacordVideoSaveBitmap(videoName);
 
         String outputPath = videoFile.getAbsolutePath() + "/" + videoName;
         final String videoPath = outputPath;
@@ -479,7 +479,7 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
             e.printStackTrace();
         }
         mMediaRecorder.start(); // 开始录制
-//        WritableMap event = Arguments.createMap();
+        WritableMap event = Arguments.createMap();
         event.putString("uri", videoFile.toURI().toString());
         event.putString("path", videoFile.getAbsolutePath());
         event.putString("fileName", videoName);
