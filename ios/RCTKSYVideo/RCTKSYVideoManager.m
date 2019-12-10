@@ -8,6 +8,11 @@
 #import "RCTKSYVideoManager.h"
 #import "RCTKSYVideo.h"
 #import <AVFoundation/AVFoundation.h>
+
+#import <React/RCTViewManager.h>
+#import <React/RCTUIManager.h>
+#import <React/RCTLog.h>
+
 @implementation RCTKSYVideoManager
 
 RCT_EXPORT_MODULE()
@@ -16,9 +21,7 @@ RCT_EXPORT_MODULE()
 
 - (UIView *)view
 {
-    self.ksyVideo = [[RCTKSYVideo alloc]initWithEventDispatcher:self.bridge.eventDispatcher];
-    return self.ksyVideo;
-//    return [[RCTKSYVideo alloc]initWithEventDispatcher:self.bridge.eventDispatcher];
+    return [[RCTKSYVideo alloc]initWithEventDispatcher:self.bridge.eventDispatcher];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -59,15 +62,37 @@ RCT_EXPORT_VIEW_PROPERTY(onVideoSaveBitmap, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onRecordVideo, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onStopRecordVideo, RCTBubblingEventBlock);
 
-//供js调用的函数，暂时没有实现
-RCT_EXPORT_METHOD(saveBitmap:data){
-    [self.ksyVideo saveBitmap:data];
+RCT_EXPORT_METHOD(saveBitmap:(nonnull NSNumber*) reactTag) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTKSYVideo *ksyVideo = viewRegistry[reactTag];
+        if (!ksyVideo || ![ksyVideo isKindOfClass:[RCTKSYVideo class]]) {
+            RCTLogError(@"Cannot find RCTKSYVideo with tag #%@", reactTag);
+            return;
+        }
+        [ksyVideo saveBitmap:nil];
+    }];
 }
-RCT_EXPORT_METHOD(recordVideo:data){
-    [self.ksyVideo recordVideo:data];
+
+RCT_EXPORT_METHOD(recordVideo:(nonnull NSNumber*) reactTag) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTKSYVideo *ksyVideo = viewRegistry[reactTag];
+        if (!ksyVideo || ![ksyVideo isKindOfClass:[RCTKSYVideo class]]) {
+            RCTLogError(@"Cannot find RCTKSYVideo with tag #%@", reactTag);
+            return;
+        }
+        [ksyVideo recordVideo:nil];
+    }];
 }
-RCT_EXPORT_METHOD(stopRecordVideo:data){
-    [self.ksyVideo stopRecordVideo:data];
+
+RCT_EXPORT_METHOD(stopRecordVideo:(nonnull NSNumber*) reactTag) {
+    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+        RCTKSYVideo *ksyVideo = viewRegistry[reactTag];
+        if (!ksyVideo || ![ksyVideo isKindOfClass:[RCTKSYVideo class]]) {
+            RCTLogError(@"Cannot find RCTKSYVideo with tag #%@", reactTag);
+            return;
+        }
+        [ksyVideo stopRecordVideo:nil];
+    }];
 }
 
 @end
