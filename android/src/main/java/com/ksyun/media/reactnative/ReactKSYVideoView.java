@@ -1,13 +1,12 @@
 package com.ksyun.media.reactnative;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -27,7 +26,6 @@ import com.ksyun.media.player.KSYMediaRecorder;
 import com.ksyun.media.player.IMediaPlayer;
 import com.ksyun.media.player.KSYMediaPlayer;
 
-//import com.ksyun.media.player.KSYMediaRecorder;
 import com.ksyun.media.player.KSYTextureView;
 import com.ksyun.media.player.recorder.KSYMediaRecorderConfig;
 
@@ -119,10 +117,11 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
     private float mVolume = 0.5f;
     private boolean mMirror = false;
     private int mDegree = 0;
-    private int mPrepareTimeout = 5;
+    private int mPrepareTimeout = 10;
     private int mReadTimeout = 30;
-    private int mBufferSize = 15;
-    private int mBufferTime = 2;
+    private int mBufferSize = 50;
+    private int mBufferTime = 1;
+
     @Override
     public void requestLayout() {
         super.requestLayout();
@@ -200,7 +199,8 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
         @Override
         public void onPrepared(IMediaPlayer mp) {
             if (ksyTextureView != null) {
-                // 开始播放视频
+                Log.d(TAG, "Video player prepared");
+
                 ksyTextureView.start();
 
                 mVideoDuration = ksyTextureView.getDuration();
@@ -213,10 +213,11 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
                 WritableMap naturalSize = Arguments.createMap();
                 naturalSize.putInt(EVENT_PROP_WIDTH, mVideoWidth);
                 naturalSize.putInt(EVENT_PROP_HEIGHT, mVideoHeight);
-                if (mp.getVideoWidth() > mp.getVideoHeight())
+                if (mp.getVideoWidth() > mp.getVideoHeight()) {
                     naturalSize.putString(EVENT_PROP_ORIENTATION, "landscape");
-                else
+                } else {
                     naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
+                }
 
                 WritableMap event = Arguments.createMap();
                 event.putDouble(EVENT_PROP_DURATION, mVideoDuration / 1000.0);
@@ -231,7 +232,9 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
                 event.putBoolean(EVENT_PROP_STEP_BACKWARD, true);
                 event.putBoolean(EVENT_PROP_STEP_FORWARD, true);
                 mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD.toString(), event);
+
                 applyModifiers();
+
                 if (mUseNativeControls) {
                     initializeMediaControllerIfNeeded();
                     mediaController.setMediaPlayer(ReactKSYVideoView.this);
@@ -299,7 +302,7 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
     };
 
     private void init(Context context) {
-        Log.e(TAG, Build.VERSION.SDK_INT+"");
+        Log.d(TAG, "VideoView init");
         mThemedReactContext = (ThemedReactContext) context;
         mEventEmitter = mThemedReactContext.getJSModule(RCTEventEmitter.class);
         mThemedReactContext.addLifecycleEventListener(this);
@@ -319,27 +322,24 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
         ksyTextureView.setOnLogEventListener(mOnLogEventListener);
         ksyTextureView.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
         //设置播放参数
-        ksyTextureView.setBufferTimeMax(2.0f);
-        ksyTextureView.setTimeout(5, 30);
+        ksyTextureView.setBufferSize(mBufferSize);
+        ksyTextureView.setBufferTimeMax(mBufferTime);
+        ksyTextureView.setTimeout(mPrepareTimeout, mReadTimeout);
 
         /* 使用自动模式 */
-//        ksyTextureView.setDecodeMode(KSYMediaPlayer.KSYDecodeMode.KSY_DECODE_MODE_AUTO);
+        ksyTextureView.setDecodeMode(KSYMediaPlayer.KSYDecodeMode.KSY_DECODE_MODE_SOFTWARE);
 
         videoFile = new File(Environment.getExternalStorageDirectory(),"zipato/records");
         imageFile = new File(Environment.getExternalStorageDirectory(),"zipato/screenshots");
         //recordScreenshotsFile = new File(Environment.getExternalStorageDirectory(),"zipato/recordScreenshots");
 
         if (!videoFile.exists()) {
-            Log.d(TAG,"目录不存在，创建目录："+videoFile.getAbsolutePath());
+            Log.d(TAG,"Creating video folder："+videoFile.getAbsolutePath());
             videoFile.mkdirs();
-        }else{
-            Log.d(TAG,"目录已存在："+videoFile.getAbsolutePath());
         }
         if (!imageFile.exists()) {
-            Log.d(TAG,"目录不存在，创建目录："+imageFile.getAbsolutePath());
+            Log.d(TAG,"Creating snapshot folder："+imageFile.getAbsolutePath());
             imageFile.mkdirs();
-        }else{
-            Log.d(TAG,"目录已存在："+imageFile.getAbsolutePath());
         }
 
         /*if (!recordScreenshotsFile.exists()) {
@@ -374,6 +374,7 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
         }
     }
 
+    @SuppressLint("WrongThread")
     public void saveBitmap() {
         SimpleDateFormat formatter    =   new    SimpleDateFormat    ("yyyyMMdd-HHmmss");
         Date curDate    =   new    Date(System.currentTimeMillis());//获取当前时间
@@ -417,6 +418,7 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
 
     }
 
+    @SuppressLint("WrongThread")
     public WritableMap reacordVideoSaveBitmap(String fileName) {
 
         String imageName = fileName + ".png";
@@ -538,6 +540,7 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
     }
 
     public void setDataSource(String url, Boolean autoPlay) {
+        Log.d(TAG,"Set data source");
         WritableMap src = Arguments.createMap();
         src.putString(ReactKSYVideoViewManager.PROP_SRC_URI, url);
 
@@ -634,24 +637,30 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
     public void setTimeout(int prepareTimeout, int readTimeout){
         mPrepareTimeout = prepareTimeout>0?prepareTimeout:5;
         mReadTimeout = readTimeout>0?readTimeout:30;
-        if (ksyTextureView != null)
+        if (ksyTextureView != null) {
             ksyTextureView.setTimeout(mPrepareTimeout, mReadTimeout);
+        }
 
     }
 
     public void setBufferSize(int bufferSize){
         mBufferSize = bufferSize>0?bufferSize:15;
-        if (ksyTextureView != null)
+        if (ksyTextureView != null) {
+            Log.d(TAG,"Setting custom buffer size");
             ksyTextureView.setBufferSize(mBufferSize);
+        }
     }
 
     public void setBufferTime(int bufferTime){
         mBufferTime = bufferTime>0?bufferTime:2;
-        if (ksyTextureView != null)
+        if (ksyTextureView != null) {
+            Log.d(TAG,"Setting custom buffer time");
             ksyTextureView.setBufferTimeMax(mBufferTime);
+        }
     }
 
     public void applyModifiers() {
+        Log.d(TAG,"Apply modifiers");
         setResizeModeModifier(mResizeMode);
         setRepeatModifier(mRepeat);
         setPausedModifier(mPaused);
