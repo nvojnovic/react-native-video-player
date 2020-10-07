@@ -20,5 +20,5 @@ Pod::Spec.new do |s|
   s.source_files  = "ios/RCTKSYVideo/*.{h,m}"
   s.vendored_frameworks = 'ios/KSYMediaPlayer.framework'
 
-  s.dependency "React"
+  s.dependency "React-Core"
 end
