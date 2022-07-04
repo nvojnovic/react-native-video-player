@@ -24,13 +24,13 @@ android {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:+'
+    implementation 'com.facebook.react:react-native:+'
     // From node_modules
 //    compile fileTree(include: ['*.jar'], dir: 'libs')
 //        compile 'com.ksyun.media:libksyplayer-arm64:2.1.2'
 //        compile 'com.ksyun.media:libksyplayer-x86:2.1.2'
 //        compile 'com.ksyun.media:libksyplayer-armv7a:2.1.2'
 //        compile 'com.ksyun.media:libksyplayer-java:2.1.2'
-    compile files('src/main/libs/libksyplayer.jar')
-    compile files('src/main/libs/libksystat.jar')
+    implementation files('src/main/libs/libksyplayer.jar')
+    implementation files('src/main/libs/libksystat.jar')
 }
