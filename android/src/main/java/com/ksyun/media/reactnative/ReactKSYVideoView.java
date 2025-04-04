@@ -7,6 +7,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -329,9 +330,13 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
         /* 使用自动模式 */
         ksyTextureView.setDecodeMode(KSYMediaPlayer.KSYDecodeMode.KSY_DECODE_MODE_SOFTWARE);
 
-        videoFile = new File(Environment.getExternalStorageDirectory(),"zipato/records");
-        imageFile = new File(Environment.getExternalStorageDirectory(),"zipato/screenshots");
-        //recordScreenshotsFile = new File(Environment.getExternalStorageDirectory(),"zipato/recordScreenshots");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            videoFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toURI());
+            imageFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toURI());
+        } else {
+            videoFile = new File(Environment.getExternalStorageDirectory(),"zipato/records");
+            imageFile = new File(Environment.getExternalStorageDirectory(),"zipato/screenshots");
+        }
 
         if (!videoFile.exists()) {
             Log.d(TAG,"Creating video folder："+videoFile.getAbsolutePath());
@@ -511,6 +516,7 @@ public class ReactKSYVideoView extends RelativeLayout implements LifecycleEventL
                     WritableMap event = Arguments.createMap();
                     event.putString("uri", uri.getPath());
                     event.putString("path", videoFile.getAbsolutePath());
+                    event.putString("fileName", videoName);
 
                     long endTime = System.currentTimeMillis();
                     event.putDouble("startTime", startTime);
